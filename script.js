@@ -13,7 +13,7 @@ const markdownToHTML = (text) => {
 const perguntarIA = async (question, game, apiKey) => {
   const model = "gemini-2.0-flash";
   const geminiURL = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-  const pergunta = `
+  const perguntalol = `
   ## Especialidade
   Você é um especialista assistente de meta para o jogo  ${game}
 
@@ -49,12 +49,83 @@ const perguntarIA = async (question, game, apiKey) => {
   Aqui está a pergunta do usuário: ${question}
   `;
 
-  const contents = [{
+  const perguntaBrawlStars = `
+  ## Especialidade
+  Você é um especialista em Brawl Stars, focado no meta atual de cada modo de jogo.
+  
+  ## Tarefa
+  Você deve responder as perguntas do usuário com base no seu
+  conhecimento do jogo, estratégias atuais, build, modos, equipamentos e dicas
+  
+  ## Regras
+  - Se não souber a resposta, diga "Não sei".
+  - Se a pergunta não for sobre o jogo, diga "Essa pergunta não está relacionada ao jogo."
+  - Considere o patch atual (${new Date().toLocaleDateString()}).
+  - Responda em até 500 caracteres, usando markdown.
+  
+  ## Exemplo
+  **Pergunta:** Melhor brawler para Pique-Gema  
+  **Resposta:**  
+  **Brawler:** Bonnie  
+  **Acessório:** Canhão Portátil  
+  **Estelar:** Chamas Recuperadoras
+  
+---
+
+**Pergunta do usuário:** ${question}
+  `;
+
+  const perguntaClash = `
+  ## Especialidade
+  Você é um especialista em Clash Royale, focado no meta atual de cada modo de jogo.
+  
+  ## Tarefa
+  Você deve responder as perguntas do usuário com base no seu
+  conhecimento do jogo, estratégias atuais, build.
+
+  ## Regras
+  - Se você não sabe a resposta, responda com 'Não sei' e não
+  tente inventar uma resposta.
+  - Se a pergunta não está relacionada ao jogo, responda com
+  'Essa pergunta não está relacionada ao jogo."
+  - Considere a data atual ${new Date().toLocaleDateString()}
+  - Faça pesquisas atualizadas sobre o patch atual, baseado na
+  data atual, para dar uma resposta coerente.
+  - Nunca responda itens que você não tenha certeza de que
+  existe no patch atual.
+  
+  ## Exemplo de resposta
+  **Pergunta do usuário:** Melhor deck de mega cavaleiro de baixo custo de elixir.
+  resposta: A build mais atual é: \n\n
+  **Custo de Elixir:**\n\n coloque o custo aqui\n\n
+  **Cartas:**\n\n coloque as itens aqui.\n\n
+  **Combo:**\n\n exemplo de combo.\n\n
+  
+  ---
+  
+  **Pergunta do usuário:** ${question}
+  `;
+
+  let pergunta;
+
+  if (game == "lol") {
+    pergunta = perguntalol;
+  } else if (game == "brawlstars") {
+    pergunta = perguntaBrawlStars;
+  } else if (game == "clashroyale") {
+    pergunta = perguntaClash;
+  }
+
+  const contents = [
+    {
       role: "user", // Config do Agente
-      parts: [{
-          text: pergunta
-        }],
-    }];
+      parts: [
+        {
+          text: pergunta,
+        },
+      ],
+    },
+  ];
 
   const tools = [
     {
@@ -70,7 +141,7 @@ const perguntarIA = async (question, game, apiKey) => {
     },
     body: JSON.stringify({
       contents,
-      tools // Usando um Agente
+      tools, // Usando um Agente
     }),
   });
 
